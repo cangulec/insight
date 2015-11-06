@@ -33,7 +33,7 @@ Expected tweets.txt file format:
 The first feature parses the text portion of the tweet. Removes all unicode characters and formats the text with timetamp as instructed in the requirements.
 The script also counts the number of tweets that contained unicode characters and outputs the value at the end of the text file.
 
-In addition to unicode characters, I have also removed common special html encodings from the tweets text portion ('&gt;'  "&amp;" etc.)
+In addition to unicode characters, I have also replaced common special html encodings from the tweets text portion ('&gt ;'  "&amp ;" etc.) with their appropirate symbols ('&gt;'  "&amp;" etc.)
 
 ## Second Feature
 The second feature will continually update the Twitter hashtag graph and hence, the average degree of the graph. The graph should just be built using tweets that arrived in the last 60 seconds as compared to the timestamp of the latest tweet. As new tweets come in, edges formed with tweets older than 60 seconds from the timstamp of the latest tweet should be evicted. For each incoming tweet, only extract the following fields in the JSON response
