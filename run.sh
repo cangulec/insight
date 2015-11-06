@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 chmod +x src/tweets_cleaned.py;
 chmod +x src/average_degree.py;
-python src/tweets_cleaned.py tweet_input/tweets.txt tweet_output/ft1.txt
-python src/average_degree.py tweet_input/tweets.txt tweet_output/ft2.txt
+python ./src/tweets_cleaned.py ./tweet_input/tweets.txt ./tweet_output/ft1.txt
+python ./src/average_degree.py ./tweet_input/tweets.txt ./tweet_output/ft2.txt
 if which sfdp >/dev/null; then
     echo "Graphviz is installed"
     echo "Generating graph.png..."
