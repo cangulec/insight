@@ -42,7 +42,7 @@ The second feature extracts the following from each line of JSON:
 * "hashtags" - hashtags found in the tweet
 * "created_at" - timestamp of the tweet
 
-Hashtags are cleaned of all unicode characters and then added to the graph if there are more than one hashtag in any given tweet.
+Hashtags are cleaned of all unicode characters, and then added to the graph only if there are more than one hashtag in any given tweet.
 Please note, if a hashtag contains only unicode characters, it will be ignored.
 
 The second feature treats the tweet that it is currently processing as the latest tweet and builds the graph/average only looking at tweets that arrived within 60 seconds of the current tweet.
@@ -50,7 +50,7 @@ The second feature treats the tweet that it is currently processing as the lates
 
 ### Building the Twitter Hashtag Graph
 
-I implemented an additional feature by generating the graph for the latests tweet using [Graphviz](http://www.graphviz.org/)
+I implemented an additional feature by generating the graph for the latests tweet using [Graphviz](http://www.graphviz.org/).
 
 When run for the following input:
 
@@ -91,5 +91,7 @@ in the run.sh. If the sfdp(graphviz) is not installed, the script tries to insta
 	└── tweet_output  
 	    ├── ft1.txt  
 	    └── ft2.txt  
+	    └── graphviz.txt
+	    └── graph.png
 
 
