@@ -1,0 +1,207 @@
+###important validate last line to make sure it picks up the most recent tweet
+
+import sys
+import json
+import string
+from datetime import datetime,timedelta
+import time
+import itertools
+import re
+
+class ArgumentError(Exception):
+    pass
+def parse_arguments(argv):
+	if len(argv) < 3:
+		raise ArgumentError("Too few arguments given. Please make sure to specify input and output.")
+	if len(argv) > 3:
+		print "Too many arguments given. Using '%s' as input and '%s' as output." % (argv[1], argv[2])
+	return argv[1],argv[2]
+
+input,output =  parse_arguments(sys.argv)
+
+##Open and read all the lines of the input file. It is assumed that another script/deamon is outputting this file periodically.
+##This line would need to be modified if we were dealing with data sets larger than computers dynamic memory.    
+with open(input) as f:
+    content = f.readlines()
+#Counter for tweets that contain non-ascii unicode characters
+tweetsWithUnicode = 0;	
+
+def cleanTweet(tweetText):
+	##if all characters are unicode, the part before the timestamp will be empty
+	##Removing replacing all special characters with their counterparts in the instructions ('\t' -> ' ' etc.)
+	return 	"%s" % (tweetText.encode('ascii',errors='ignore').replace('\n', ' ').replace('\/', '/').replace('\r', '').replace('\\\\', '\\').replace('\t', ' ').replace('\"', '"').replace('\t', ' ').strip() )
+	
+def generate_graphviz_output(set):
+	graphviz = open("graphviz.txt", 'w')
+	graphviz.write("graph G {")
+	for eachpair in set:
+		for i,eachvalue in enumerate(eachpair):
+			graphviz.write("\"")
+			graphviz.write(eachvalue.replace('#',''))
+			graphviz.write("\"")
+			if i < len(eachpair)-1:
+					graphviz.write(" -- ")
+		graphviz.write(";\n")
+	graphviz.write("}")
+	
+def getHashtags(tweetText):
+	#this will treat #_test and #this_example as a legitimate hashtags while it will remove 
+	#clean html tags here somewhere
+	listofHashtags = list(set([re.sub(r"#+", "#", k) for k in set([re.sub(r"(\W+)$", "", j, flags = re.UNICODE) for j in set([i for i in tweetText.lower().replace('&amp;','').split() if i.startswith("#")])])]))
+	#remove trailing bits for non-approved characters .,-
+	listofHashtags = [w.split('.', 1)[0].split(',', 1)[0].split('-', 1)[0] for w in listofHashtags]
+	#remove empty hashtag strings 
+	listofHashtags = filter(None, listofHashtags)
+	listofHashtags = [w for w in listofHashtags if not(w[1].isdigit())]
+	return listofHashtags
+
+#get latest tweets timestamp
+def getLastTweetTimeStampFromJson():
+	#fix if the json is broken for the last line
+	last_json = json.loads(content[-1])
+	#print content[-1]
+	ts = datetime.strptime(last_json['created_at'],'%a %b %d %H:%M:%S +0000 %Y')
+	return  ts
+# read this http://stackoverflow.com/questions/7703865/going-from-twitter-date-to-python-datetime-date
+def getTimeStampFromJson(json):
+	#fix if the json is broken for the last line
+	#print content[-1]
+	ts = datetime.strptime(json['created_at'],'%a %b %d %H:%M:%S +0000 %Y')
+	return ts
+		
+#read this for parsing bit http://stackoverflow.com/questions/2527892/parsing-a-tweet-to-extract-hashtags-into-an-array-in-python
+
+#open output files to write. this assumes the user that executes this code has a read/write access in the directory.
+target = open(output, 'w')
+mostRecentTweetTimeStamp = getLastTweetTimeStampFromJson()
+#print type(mostRecentTweetTimeStamp)
+##https://www.hashtags.org/platforms/twitter/what-characters-can-a-hashtag-include/
+
+
+##cleanContent = []
+##for tweet in content:
+##	try:
+##		parsed_json = json.loads(tweet.replace(r"\'","'"))
+##		parsed_json['entities']['hashtags']
+##		hashtags = []
+##		for hashtag in parsed_json['entities']['hashtags']:
+##			cleanHashtag = cleanTweet(hashtag['text'])
+##			if cleanHashtag <> '':
+##				hashtags.append(cleanHashtag)
+##		##remove dupes
+##		parsed_json['entities']['hashtags'] = list(set(hashtags))
+##		cleanContent.append(parsed_json)
+##		#print parsed_json['entities']['hashtags']
+##	except KeyError:
+##		pass
+
+
+## add all of them to list - there will be duplicate nodes
+##remove them while you are calculating
+		
+my_list = []
+uniqueHashtags = set()
+##for hashtags
+my_list.append([])
+##for timestamps
+my_list.append([])
+for tweet in content:        
+		##parse JSON and remove all escaped single quotes '\' 
+		parsed_json = json.loads(tweet.replace(r"\'","'"))
+		try:		
+			#p = 0
+			if(mostRecentTweetTimeStamp - getTimeStampFromJson(parsed_json)) <= timedelta(seconds = 60):
+				hashtags = []
+				for hashtag in parsed_json['entities']['hashtags']:
+					cleanHashtag = cleanTweet(hashtag['text'])
+					if cleanHashtag <> '':
+						hashtags.append(cleanHashtag)
+				##remove dupes on the same tweet
+				hashtags =list(set(hashtags))
+				#print hashtags
+				thisHashtags = hashtags					
+				if len(thisHashtags) > 1:
+					uniqueHashtags.update(thisHashtags)
+					#target.write(thisHashtags)
+					for pair in itertools.combinations(thisHashtags, 2):
+						my_list[0].append(pair)
+						my_list[1].append(getTimeStampFromJson(parsed_json))
+				target.write(cleanTweet(parsed_json['text']))
+					#target.write(" %s " % totalConnections  ) 	
+				target.write(" %s " % len(uniqueHashtags)  )
+				vertices = len(my_list[0]) * 2 
+				rollingAverage = 0.00
+				##print type(rollingAverage)
+				##https://docs.python.org/2/tutorial/floatingpoint.html#tut-fp-issues
+				if len(uniqueHashtags)>0:
+					rollingAverage = round(vertices/len(uniqueHashtags),2)
+				target.write("%s vertices-" % vertices  )
+				target.write(" %s \n" % rollingAverage )
+				#if len(uniqueHashtags) == 0:
+				#	target.write("No Hashtags yet \n"    ) 
+				#else:
+				#	target.write("%s \n" % len(uniqueHashtags/totalConnections   ) 
+		##Account for missing keys
+		#skip this JSON line since it does not contain 'text' field. e.g.  line 108 on the sample file -> '{"limit":{"track":39,"timestamp_ms":"1446218986803"}}'
+
+		except KeyError:
+			pass
+		#fix the escape stuff
+		#clean html tags here somewhere
+		
+		##calculate the average at this point in time
+		fruit = set(my_list[0]) 	
+##		totalConnections = 0
+##		for uniqueTag in uniqueHashtags:
+##			for eachpair in fruit:
+##				if uniqueTag in eachpair:
+##					totalConnections = totalConnections + 1
+##		target.write("%d" % sum)
+##		target.write("\n")	
+		
+				
+		
+print my_list
+print len(my_list[0])
+
+##remove all not within 60 seconds
+delete = 0 
+for time in my_list[1]:
+	if (mostRecentTweetTimeStamp - getTimeStampFromJson(parsed_json)) <= timedelta(seconds = 2):
+		my_list[1].remove(time)
+		del my_list[0][delete]
+		delete = delete + 1
+		
+#Kill duplicates
+print set(my_list[0])
+
+#print my_list[0]
+#for item in uniqueHashtags:
+  #target.write("%s\n" % item)
+#Should probably add remove s depending on number		
+##close the file handles
+
+
+
+
+#print uniqueHashtags
+#sum = 0
+#generate_graphviz_output(fruit)
+	
+#for uniqueTag in uniqueHashtags:
+#	count = 0
+#	for eachpair in fruit:
+#		if uniqueTag in eachpair:
+#			count = count + 1
+#			sum = sum + 1
+#	#print uniqueTag , count
+#	#print count
+#
+##Total Connections	
+#print sum
+target.close()
+
+##do this bullshit
+
+
+
