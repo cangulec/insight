@@ -18,7 +18,7 @@ e.g. python ./src/tweets_cleaned.py ./tweet_input/tweets.txt ./tweet_output/ft1.
 
 It is assumed that the input file is a text document with each line containing JSON of tweet from the Twitter API.
 
-Expected tweets.txt example:
+Expected tweets.txt file format:
 
 	{JSON of first tweet}  
 	{JSON of second tweet}  
@@ -30,45 +30,7 @@ Expected tweets.txt example:
 
 ## First Feature
 
-The point of the first feature is to extract and clean the relevant data for the Twitter JSON messages.  For example, a typical tweet might come in the following JSON message (which we have expanded on to multiple lines to make it easier to read):
 
-<pre>
-{
- "created_at":"<b>Thu Oct 29 17:51:01 +0000 2015</b>","id":659789759787589632,
- "id_str":"659789759787589632","text":"<b>Spark Summit East this week! #Spark #Apache</b>",
- "source":"\u003ca href=\"http:\/\/twitter.com\" rel=\"nofollow\"\u003eTwitter Web Client\u003c\/a\u003e",
- "truncated":false,"in_reply_to_status_id":null,"in_reply_to_status_id_str":null,
- "in_reply_to_user_id":null,"in_reply_to_user_id_str":null,"in_reply_to_screen_name":null,
- "user":{"id":40077534,"id_str":"40077534","name":"scott bordow","screen_name":"sbordow",
- "location":null,"url":null,"description":"azcentral sports high school sports columnist. If you send me a tweet, you consent to letting azcentral sports use and showcase it in any media.",
- "protected":false,"verified":true,"followers_count":4704,"friends_count":2249,"listed_count":94,
- "favourites_count":51,"statuses_count":15878,"created_at":"Thu May 14 20:36:46 +0000 2009",
- "utc_offset":-25200,"time_zone":"Pacific Time (US & Canada)","geo_enabled":true,"lang":"en",
- "contributors_enabled":false,"is_translator":false,"profile_background_color":"C0DEED",
- "profile_background_image_url":"http:\/\/abs.twimg.com\/images\/themes\/theme1\/bg.png",
- "profile_background_image_url_https":"https:\/\/abs.twimg.com\/images\/themes\/theme1\/bg.png",
- "profile_background_tile":false,"profile_link_color":"0084B4","profile_sidebar_border_color":"C0DEED",
- "profile_sidebar_fill_color":"DDEEF6","profile_text_color":"333333","profile_use_background_image":true,
- "profile_image_url":"http:\/\/pbs.twimg.com\/profile_images\/576178462496423936\/YnOZ-StV_normal.jpeg",
- "profile_image_url_https":"https:\/\/pbs.twimg.com\/profile_images\/576178462496423936\/YnOZ-StV_normal.jpeg",
- "default_profile":true,"default_profile_image":false,"following":null,"follow_request_sent":null,"notifications":null},
- "geo":null,"coordinates":null,"place":{"id":"a612c69b44b2e5da","url":"https:\/\/api.twitter.com\/1.1\/geo\/id\/a612c69b44b2e5da.json","place_type":"admin","name":"Arizona","full_name":"Arizona, USA","country_code":"US",
- "country":"United States","bounding_box":{"type":"Polygon","coordinates":[[[-114.818269,31.332246],[-114.818269,37.004261],[-109.045152,37.004261],[-109.045152,31.332246]]]},
- "attributes":{}},"contributors":null,"is_quote_status":false,"retweet_count":0,"favorite_count":0,
- "entities":{"hashtags":[{"text":"Spark","indices":[29,35]},{"text":"Apache","indices":[36,43]}],"urls":[],"user_mentions":[],"symbols":[]},
- "favorited":false,"retweeted":false,"filter_level":"low","lang":"en","timestamp_ms":"1446141111691"
-}  
-</pre>
-
-where the relevant text that we want to extract has been bolded.  After extracting this information, this tweet should be outputted as
-
-	Spark Summit East this week! #Spark #Apache (timestamp: Thu Oct 29 17:51:01 +0000 2015)
-
-with the format of 
-
-	<contents of "text" field> (timestamp: <contents of "created_at" field>)
-
-In this case, the tweet's text was already clean, but another example tweet might be:
 
 
 
@@ -79,7 +41,7 @@ The second feature will continually update the Twitter hashtag graph and hence, 
 
 ### Building the Twitter Hashtag Graph
 
-
+![example](tweet_output/example-graph.png)
 
 The full list of tweets now is 
 ```
