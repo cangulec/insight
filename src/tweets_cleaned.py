@@ -3,7 +3,6 @@ import json
 import string
 import re
 import time
-import htmllib
 
 class ArgumentError(Exception):
     pass
