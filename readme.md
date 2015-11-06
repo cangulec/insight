@@ -6,11 +6,15 @@ Insight Data Engineering - Coding Challenge
 This repository is my implementation of the two features of the challange requirements.
 
 Feature 1: Clean and extract the text from the raw JSON tweets that come from the Twitter Streaming API, and track the number of tweets that contain unicode.
+
 Feature 2: Calculate the average degree of a vertex in a Twitter hashtag graph for the last 60 seconds, and update this each time a new tweet appears.
 
 ## Details of Implementation
 
-We'd like you to implement your own version of these two features.  However, we don't want this challenge to focus on the relatively uninteresting "dev ops" of connecting to the Twitter API, which can be complicated for some users.  Normally, tweets can be obtained through Twitter's API in JSON format, but you may assume that this has already been done and written to a file named `tweets.txt` inside a directory named `tweet_input`.  For simplicity, this file `tweets.txt` will only contain the actual JSON messages (in reality, the API also can emit messages about the connection and the API rate limits).  Additionally, `tweets.txt` will have the content of each tweet on a newline:
+I have implemented both features as stand-alone programs in case the end-user would like to utilize only one.
+Both programs take 2 arguments (input file, output file).
+
+It is assumed that the input file is text document with each line containing JSON of tweet from the Twitter API.
 
 tweets.txt:
 
