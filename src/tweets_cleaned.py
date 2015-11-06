@@ -9,6 +9,8 @@ class ArgumentError(Exception):
     pass
 	
 def parse_arguments(argv):
+	##Validate arguments
+	##the script expects 2 arguments- an input file and an output file
 	if len(argv) < 3:
 		raise ArgumentError("Too few arguments given. Please make sure to specify input and output.")
 	if len(argv) > 3:
