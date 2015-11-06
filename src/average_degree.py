@@ -46,7 +46,7 @@ def getTimeStampFromJson(json):
 
 def removeVertices(old_list,mostRecentTweetTimeStamp,timeframe):
 	##check each Vertices in 'tree'
-	##if timestamps is more than 'timeframe' seconds away, remove from the graph
+	##if timestamp is more than 'timeframe' seconds away, remove from the graph
 	updatedVertices = []
 	for item in old_list:
 		#[0]th element contains the timestamp
@@ -84,9 +84,6 @@ def main():
 		
 	#open output files to write. this assumes the user that executes this code has a read/write access in the directory.
 	target = open(output, 'w')
-	
-	## add all of them to list - there will be duplicate nodes
-	##remove them while you are calculating
 			
 	##Initiate the graph
 	##tree will contain each edge along with the timestamp of that edge
