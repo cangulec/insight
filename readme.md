@@ -30,7 +30,8 @@ Expected tweets.txt file format:
 
 ## First Feature
 
-The first feature parses the text portion of the tweet. Removes all unicode characters and formats the text with timetamp as instructed in the requirements.
+The first feature parses the text portion of the tweet, removes all unicode characters and formats the text with the timetamp as instructed in the requirements.
+
 The script also counts the number of tweets that contained unicode characters and outputs the value at the end of the text file.
 
 In addition to unicode characters, I have also replaced common special html encodings from the tweets text portion ('&gt ;'  "&amp ;" etc.) with their appropirate symbols ('&gt;'  "&amp;" etc.)
