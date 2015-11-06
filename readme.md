@@ -45,7 +45,7 @@ The second feature extracts the following from each line of JSON:
 Hashtags are cleaned of all unicode characters, and then added to the graph only if there are more than one hashtag in any given tweet.
 Please note, if a hashtag contains only unicode characters, it will be ignored.
 
-The second feature treats the tweet that it is currently processing as the latest tweet and builds the graph/average only looking at tweets that arrived within 60 seconds of the current tweet.
+The second feature treats the tweet that it is currently processing as the latest tweet and builds the graph & calculates the average only looking at tweets that arrived within 60 seconds of the current tweet.
 
 
 ### Building the Twitter Hashtag Graph
