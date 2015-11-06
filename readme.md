@@ -41,10 +41,10 @@ The second feature will continually update the Twitter hashtag graph and hence, 
 
 ### Building the Twitter Hashtag Graph
 
-![example](tweet_output/example-graph.png)
-![example2](tweet_output/example-graph-2.png)
+I implemented an additional feature by generating the graph for the latests tweet using [Graphviz](http://www.graphviz.org/)
 
-The full list of tweets now is 
+When run for the following input:
+
 ```
 Spark Summit East this week! #Spark #Apache (timestamp: Thu Oct 29 17:51:01 +0000 2015)
 Just saw a great post on Insight Data Engineering #Apache #Hadoop #Storm (timestamp: Thu Oct 29 17:51:30 +0000 2015)
@@ -53,6 +53,16 @@ Excellent post on #Flink and #Spark (timestamp: Thu Oct 29 17:51:56 +0000 2015)
 New and improved #HBase connector for #Spark (timestamp: Thu Oct 29 17:51:59 +0000 2015)
 New 2.7.1 version update for #Hadoop #Apache (timestamp: Thu Oct 29 17:52:05 +0000 2015)
 ```
+
+the script generates the following graph
+![example](tweet_output/example-graph.png)
+
+When run for the tweet file
+![example2](tweet_output/example-graph-2.png)
+
+Please keep in mind, the script generates the graph for the last tweet (and all the tweets that are within the threshold time period of the last tweet). Generating a graph for every tweet in the input file seemed illogical and impractical.
+
+
 
 We can see that the very first tweet has a timestamp that is more than 60 seconds behind this new tweet. This means that we do not want to include our first tweet in our average degree calculation.
 
