@@ -78,112 +78,7 @@ The second feature will continually update the Twitter hashtag graph and hence, 
 * "created_at" - timestamp of the tweet
 
 ### Building the Twitter Hashtag Graph
-Example of 4 tweets (using the same format from the first feature)
-```
-Spark Summit East this week! #Spark #Apache (timestamp: Thu Oct 29 17:51:01 +0000 2015)
-Just saw a great post on Insight Data Engineering #Apache #Hadoop #Storm (timestamp: Thu Oct 29 17:51:30 +0000 2015)
-Doing great work #Apache (timestamp: Thu Oct 29 17:51:55 +0000 2015)
-Excellent post on #Flink and #Spark (timestamp: Thu Oct 29 17:51:56 +0000 2015)
-```
 
-Extracted hashtags from each tweet
-```
-#Spark, #Apache (timestamp: Thu Oct 29 17:51:01 +0000 2015)
-#Apache, #Hadoop, #Storm (timestamp: Thu Oct 29 17:51:30 +0000 2015)
-#Apache (timestamp: Thu Oct 29 17:51:55 +0000 2015)
-#Flink, #Spark (timestamp: Thu Oct 29 17:51:56 +0000 2015)
-```
-
-Two hashtags will be connected if and only if they are present in the same tweet. Only tweets that contain two or more **DISTINCT** hashtags can create new edges.
-
-A good way to create this graph is with an edge list where an edge is defined by two hashtags that are connected. 
-
-The edge list made by all the above tweets is as follows:
-```
-#Spark <-> #Apache
-
-#Apache <-> #Hadoop
-#Hadoop <-> #Storm
-#Storm <-> #Apache
-
-#Flink <-> #Spark
-```
-
-Notice that the third tweet did not generate a new edge since there were no other hashtags besides `#Apache` in that tweet. Also, all tweets occured in the 60 seconds time window as compared to the latest tweet and they all are included in building the graph.
-
-The edge list can be visualized with the following diagrams where each node is a hashtag. The first tweet will generate the `#Spark` and `#Apache` nodes.
-
-![spark-apache-graph](images/htag_graph_1.png)
-
-The second tweet contains 3 hashtags `#Apache`, `#Hadoop`, and `#Storm`. `#Apache` already exists, so only `#Hadoop` and `#Storm` are added to the graph.
-
-![apache-hadoop-storm-graph](images/htag_graph_2.png)
-
-The third tweet generated no edges, so no new nodes will be added to the graph.
-
-The fourth tweet contains `#Flink` and `#Spark`. `#Spark` already exists, so only `#Flink` will be added.
-
-![flink-spark-graph](images/htag_graph_3.png)
-
-We can now calculate the degree of each node which is defined as the number of connected neighboring nodes.
-
-![graph-degree3](images/htag_degree_3.png)
-
-The average degree for simplicity will be calculated by summing the degrees of all nodes in all graphs and dividing by the total number of nodes in all graphs.
-
-Average Degree = (1+2+3+2+2)/5 = 2.00
-
-The rolling average degree since the 4th tweet is now 
-```
-2.00
-```
-
-### Modifying the Twitter Hashtag Graph with Incoming Tweet
-Now let's say another tweet has arrived
-```
-New and improved #HBase connector for #Spark (timestamp: Thu Oct 29 17:51:59 +0000 2015)
-```
-
-The extracted hashtags are then
-```
-#HBase, #Spark (timestamp: Thu Oct 29 17:51:59 +0000 2015)
-```
-
-and added to the edge list
-```
-#Spark <-> #Apache
-
-#Apache <-> #Hadoop
-#Hadoop <-> #Storm
-#Storm <-> #Apache
-
-#Flink <-> #Spark
-
-#HBase <-> $Spark
-```
-
-The graph now looks like the following
-
-![hbase-spark-graph](images/htag_graph_4.png)
-
-with the updated degree calculation for each node. Here only `#Spark` needs to be incremented due to the additional `#HBase` node.
-
-![graph-degree4](images/htag_degree_4.png)
-
-The average degree will be recalculated using the same formula as before.
-
-Average Degree = (1+3+1+3+2+2)/6 = 2.00
-
-The rolling average degree since the 4th tweet is now 
-```
-2.00
-2.00
-```
-
-### Maintaining Data within the 60 Second Window
-Now let's say that the next tweet that comes in has the following timestamp
-```
-New 2.7.1 version update for #Hadoop #Apache (timestamp: Thu Oct 29 17:52:05 +0000 2015)
 ```
 
 The full list of tweets now is 
@@ -218,28 +113,7 @@ The new edge list only has the `#Spark` <-> `#Apache` edge removed since `#Hadoo
 #HBase <-> $Spark
 ```
 
-The old graph has now been disconnected forming two graphs.
 
-![evicted-spark-apache](images/htag_graph_5.png)
-
-We'll then calculate the new degree for all the nodes in both graphs.
-
-![graph-degree5](images/htag_degree_5.png)
-
-Recalculating the average degree of all nodes in all graphs is as follows
-
-```
-Average Degree = (1+2+1+2+2+2)/6 = 1.67
-```
-
-Normally the average degree is calculated for a single graph, but maintaining multiple graphs for this problem can be quite difficult. For simplicity we are only interested in calculating the average degree of of all the nodes in all graphs despite them being disconnected.
-
-The rolling average degree since the 4th tweet is now 
-```
-2.00
-2.00
-1.67
-```
 
 The output of the second feature should be a file in the `tweet_output` directory named `ft2.txt` that contains the rolling average for each tweet in the file (e.g. if there are three input tweets, then there should be 3 averages), following the format above.  The precision of the average should be two digits after the decimal place (i.e. rounded to the nearest hundredths place).
 
