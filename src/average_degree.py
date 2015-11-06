@@ -25,6 +25,8 @@ def cleanTweet(tweetText):
 	return 	"%s" % (tweetText.encode('ascii',errors='ignore').replace('\n', ' ').replace('\/', '/').replace('\r', '').replace('\\\\', '\\').replace('\t', ' ').replace('\"', '"').replace('\t', ' ').strip().lower() )
 	
 def generate_graphviz_output(set):
+	##Generates the input file for graphviz
+	##this function only runs once
 	graphviz = open("tweet_output/graphviz.txt", 'w')
 	graphviz.write("graph G {")
 	for eachpair in set:
