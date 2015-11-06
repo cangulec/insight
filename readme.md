@@ -14,9 +14,11 @@ Feature 2: Calculate the average degree of a vertex in a Twitter hashtag graph f
 I have implemented both features as stand-alone programs in case the end-user would like to utilize only one.
 Both programs take 2 arguments (input file, output file).
 
-It is assumed that the input file is text document with each line containing JSON of tweet from the Twitter API.
+e.g. python ./src/tweets_cleaned.py ./tweet_input/tweets.txt ./tweet_output/ft1.txt
 
-tweets.txt:
+It is assumed that the input file is a text document with each line containing JSON of tweet from the Twitter API.
+
+Expected tweets.txt example:
 
 	{JSON of first tweet}  
 	{JSON of second tweet}  
