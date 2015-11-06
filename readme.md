@@ -54,41 +54,16 @@ New and improved #HBase connector for #Spark (timestamp: Thu Oct 29 17:51:59 +00
 New 2.7.1 version update for #Hadoop #Apache (timestamp: Thu Oct 29 17:52:05 +0000 2015)
 ```
 
-the script generates the following graph
+The script generates the following graph:
+
 ![example](tweet_output/example-graph.png)
 
-When run for the tweet file
+When run for the data-gen/tweets.txt file in the instructions, the script produces the following output:
+
 ![example2](tweet_output/example-graph-2.png)
 
 Please keep in mind, the script generates the graph for the last tweet (and all the tweets that are within the threshold time period of the last tweet). Generating a graph for every tweet in the input file seemed illogical and impractical.
 
-
-
-We can see that the very first tweet has a timestamp that is more than 60 seconds behind this new tweet. This means that we do not want to include our first tweet in our average degree calculation.
-
-The new hashtags to be used are as follows
-```
-#Apache, #Hadoop, #Storm (timestamp: Thu Oct 29 17:51:30 +0000 2015)
-#Apache (timestamp: Thu Oct 29 17:51:55 +0000 2015)
-#Flink, #Spark (timestamp: Thu Oct 29 17:51:56 +0000 2015)
-#HBase, #Spark (timestamp: Thu Oct 29 17:51:59 +0000 2015)
-#Hadoop #Apache (timestamp: Thu Oct 29 17:52:05 +0000 2015)
-```
-
-The new edge list only has the `#Spark` <-> `#Apache` edge removed since `#Hadoop` <-> `#Apache` from the new tweet already exists in the edge list.
-```
-#Apache <-> #Hadoop
-#Hadoop <-> #Storm
-#Storm <-> #Apache
-
-#Flink <-> #Spark
-
-#HBase <-> $Spark
-```
-
-
-
-The output of the second feature should be a file in the `tweet_output` directory named `ft2.txt` that contains the rolling average for each tweet in the file (e.g. if there are three input tweets, then there should be 3 averages), following the format above.  The precision of the average should be two digits after the decimal place (i.e. rounded to the nearest hundredths place).
 
 ## Collecting tweets from the Twitter API
 
