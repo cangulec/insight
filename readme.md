@@ -3,7 +3,7 @@ Insight Data Engineering - Coding Challenge
 
 ## Challenge Summary
 
-This repository is my implementation of the two features of the challange requirements.
+This repository is my implementation of the two features of the Insight Data Engineering coding challenge.
 
 Feature 1: Clean and extract the text from the raw JSON tweets that come from the Twitter Streaming API, and track the number of tweets that contain unicode.
 
