@@ -24,7 +24,7 @@ def cleanAndFormatTweet(tweetJSON):
 	return 	"%s (Timestamp:%s)\n" % (tweetJSON['text'].encode('ascii',errors='ignore').replace('&amp;', '&').replace('&quot;', '"').replace('&apos;', "'").replace('&gt;', '>').replace('&lt;', '<').replace('\n', ' ').replace('\/', '/').replace('\r', '').replace('\\\\', '\\').replace('\t', ' ').replace('\"', '"').replace('\t', ' ').strip() , tweetJSON['created_at'])
 
 def checkForUnicode(tweetJSON):
-	##Input: Text field of 
+	##Input: JSON line
 	##Returns 1 if the text contains non-ascii unicode characters
 	##Returns 0 if the text is ascii
 	##Implemented this way due to legibility
