@@ -11,7 +11,7 @@ Feature 2: Calculate the average degree of a vertex in a Twitter hashtag graph f
 
 ## Details of Implementation
 
-I have implemented both features as stand-alone programs in case the end-user would like to utilize only one.
+I implemented both features as stand-alone programs in case the end-user would like to utilize only one.
 Both programs take 2 arguments (input file, output file).
 
 e.g. python ./src/tweets_cleaned.py ./tweet_input/tweets.txt ./tweet_output/ft1.txt
@@ -37,9 +37,16 @@ The script also counts the number of tweets that contained unicode characters an
 In addition to unicode characters, I have also replaced common special html encodings from the tweets text portion ('&gt ;'  "&amp ;" etc.) with their appropirate symbols ('&gt;'  "&amp;" etc.)
 
 ## Second Feature
-The second feature will continually update the Twitter hashtag graph and hence, the average degree of the graph. The graph should just be built using tweets that arrived in the last 60 seconds as compared to the timestamp of the latest tweet. As new tweets come in, edges formed with tweets older than 60 seconds from the timstamp of the latest tweet should be evicted. For each incoming tweet, only extract the following fields in the JSON response
+
+The second feature extracts the following from each line of JSON:
 * "hashtags" - hashtags found in the tweet
 * "created_at" - timestamp of the tweet
+
+Hashtags are cleaned of all unicode characters and then added to the graph if there are more than one hashtag in any given tweet.
+Please note, if a hashtag contains only unicode characters, it will be ignored.
+
+The second feature treats the tweet that it is currently processing as the latest tweet and builds the graph/average only looking at tweets that arrived within 60 seconds of the current tweet.
+
 
 ### Building the Twitter Hashtag Graph
 
