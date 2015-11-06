@@ -127,6 +127,7 @@ def main():
 			except KeyError:
 				pass
 
+	##will generate actual visuals for the last tweet in the input file
 	generate_graphviz_output(uniqueEdges)
 	#print tree
 	target.close()
