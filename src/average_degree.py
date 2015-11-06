@@ -1,161 +1,141 @@
-import re
+from __future__ import division
 import sys
 import json
-from time import mktime,strptime
-from datetime import datetime 
+import string
+from datetime import datetime,timedelta
+import itertools
+import re
+import time
 
+class ArgumentError(Exception):
+    pass
+def parse_arguments(argv):
+	if len(argv) < 3:
+		raise ArgumentError("Too few arguments given. Please make sure to specify input and output.")
+	if len(argv) > 3:
+		print "Too many arguments given. Using '%s' as input and '%s' as output." % (argv[1], argv[2])
+	return argv[1],argv[2]
 
-def construct_tree(tree,nodes_list):
-	"""
-	This function constructs a dictionary representing the tree.
-	Each Key is in turn a dictionary and has value representing a node with which it is linked to.
-	"""
+def cleanTweet(tweetText):
+	##Clean hashtags according to instructions
+	##Removing replacing all special characters with their counterparts in the instructions ('\t' -> ' ' etc.)
+	##Note: if all characters are non-ascii unicode, will return blank
+	return 	"%s" % (tweetText.encode('ascii',errors='ignore').replace('\n', ' ').replace('\/', '/').replace('\r', '').replace('\\\\', '\\').replace('\t', ' ').replace('\"', '"').replace('\t', ' ').strip().lower() )
+	
+def generate_graphviz_output(set):
+	graphviz = open("tweet_output/graphviz.txt", 'w')
+	graphviz.write("graph G {")
+	for eachpair in set:
+		for i,eachvalue in enumerate(eachpair):
+			graphviz.write("\"")
+			graphviz.write(eachvalue.replace('#',''))
+			graphviz.write("\"")
+			if i < len(eachpair)-1:
+					graphviz.write(" -- ")
+		graphviz.write(";\n")
+	graphviz.write("}")
+	
+def getTimeStampFromJson(json):
+	#convert 'created_at' string from JSON to datetime object
+	ts = datetime.strptime(json['created_at'],'%a %b %d %H:%M:%S +0000 %Y')
+	return ts
 
-	for node_list in nodes_list:
+def removeVertices(old_list,mostRecentTweetTimeStamp,timeframe):
+	##check each Vertices in 'tree'
+	##if timestamps is more than 'timeframe' seconds away, remove from the graph
+	updatedVertices = []
+	for item in old_list:
+		#[0]th element contains the timestamp
+		if (mostRecentTweetTimeStamp - item[0]) <= timedelta(seconds = timeframe):
+			updatedVertices.append(item)
+	return updatedVertices
 
-		if len(node_list) > 1:
+def getUniqueEdges(tree):
+	##receives the graph (each edge) as input
+	##returns values of the unique edges
+	##this necessary because the tree can contain multiple edges of the same pair
+	##e.g if two tweets that contain the same 2 hash-tags come at different times, there will be two entries in tree to account for both tweets
+	## tweet1-> (time1, hashtag1,hashtag2)
+	## tweet2-> (time2, hashtag1,hashtag2)
+	##this function removes duplicate pairs
+	return set([x[1] for x in tree])
+	
+def getNodeCount(tree):
+	##given every pair of vertices
+	##count the number of unique nodes
+	my_set = set()
+	for pair in tree:
+		for item in pair:
+			my_set.update([item])
+	return len(my_set)
 
-			for index,node in enumerate(node_list):
-				if not node in tree:
-					tree[node] = {}
-
-				next_link_node = node_list[(index+1) % len(node_list)]
-				tree[node][next_link_node] = 1
-				
-				prev_link_node = node_list[index-1]
-				tree[node][prev_link_node] = 1
-				
-
-def delete_nodes(tree,nodes_list):
-	"""
-	This function deletes all links which are the past the 60 seconds gap.
-	"""
-
-	for node_list in nodes_list:
-
-		if len(node_list) > 1:
-
-			for index,node in enumerate(node_list):
-				if not node in tree:
-					tree[node] = {}
-				next_link_node = node_list[(index+1) % len(node_list)]
-				if next_link_node in tree[node]:
-					del tree[node][next_link_node]
-				
-				prev_link_node = node_list[index-1]
-				if prev_link_node in tree[node]:
-					del tree[node][prev_link_node]
-
-				if not tree[node]:
-					del tree[node]
-
-
-def check_to_delete(time_tree):
-	"""
-	This function sees which all links are to be deleted based on timestamp.
-	"""
-
-	current_epoch_time = time_tree[-1][0]
-	starting_point = 0
-	for index in xrange(len(time_tree)-1,-1,-1):
-		if current_epoch_time - time_tree[index][0] > 60:
-			starting_point = index+1
-
-	remove_list = []
-
-	for index2 in xrange(starting_point):
-		nodes_to_remove = time_tree[index2][1]
-		del time_tree[index2]
-		remove_list.append(nodes_to_remove)
-
-	return remove_list
-
-
-if __name__ == "__main__":
-
-	try:
-		input_file = sys.argv[1]
-		output_file = sys.argv[2]
-	except:
-		print "Please specify the input and output file"
-		sys.exit()
-
-	f1 = open(input_file)
-	lines = f1.readlines()
-
-	f2 = open(output_file,'w')
-
-	time_tree = []
-	node_tree = {}
-	latest_degree = '0.00'
-
-	for line in lines:
-
-		line = line.strip()
-		if not line:
-                	continue
-
-		hashtags = re.findall(r'#[a-zA-Z0-9]+',line)
-		if not hashtags and not node_tree:
-			f2.write(latest_degree+'\n')
-			continue
-
-		hashtags = [hashtag.lower() for hashtag in hashtags]
-
-		try:
-			ts = re.findall(r'timestamp:(.*)\)',line)[0].strip()
-		except:
-			continue
-
-		temp_time = strptime(ts, "%a %b %d %H:%M:%S +0000 %Y")
-
-		dt = datetime.fromtimestamp(mktime(temp_time))
-
-		epoch_str = dt.strftime('%s')
-
-		epochtime = int(epoch_str)
-
-		time_tree.append((epochtime,hashtags))
-
-		#print "*******************************************"
-
-		#print "========== HASHTAGS ======================="
-		print hashtags
-
-		construct_tree(node_tree,[hashtags])
-
-		#print "========== AFTER CONSTRUCT ================"
-		print node_tree
-
-		remove_list = check_to_delete(time_tree)
-
-		#print "========== REMOVE LIST ===================="
-		#print remove_list
-
-		if remove_list:
-			delete_nodes(node_tree,remove_list)
-			#print "=========== AFTER DELETE =============="
-			#print node_tree
-
-		#print "==== FINAL TREE ====",node_tree
-		total_degree = len(node_tree.values())
-
-		if total_degree:
-			avg = 0
-			for value in node_tree.values():
-				avg += len(value.values())
-			calculation =  "%.2f" % (float(avg)/float(total_degree))
-		else:
-			calculation = '0.00'
-
-		latest_degree = calculation
+def main():
+	#Look back period (in number of seconds) while processing current tweet
+	LOOKBACK_PERIOD_IN_SECONDS = 60
+	input,output =  parse_arguments(sys.argv)
+	##Open and read all the lines of the input file. It is assumed that another script/deamon is outputting this file periodically.
+	##This line would need to be modified if we were dealing with data sets larger than computers dynamic memory.    
+	with open(input) as f:
+		content = f.readlines()	
 		
-		#print("%d/%d"%(avg,total_degree))
+	#open output files to write. this assumes the user that executes this code has a read/write access in the directory.
+	target = open(output, 'w')
+	
+	## add all of them to list - there will be duplicate nodes
+	##remove them while you are calculating
+			
+	##Initiate the graph
+	##tree will contain each edge along with the timestamp of that edge
+	##e.g. (timestamp, node1, node2)
+	tree = []
+	
+	for tweet in content:        
+			##parse JSON and remove all escaped single quotes '\' 
+			parsed_json = json.loads(tweet.replace(r"\'","'"))
+			##try to extract fields 'text' and 'created_at'
+			##if the json line does not contain either of these fields will skip the line entirely
+			##e.g.  line 108 on the sample file -> '{"limit":{"track":39,"timestamp_ms":"1446218986803"}}'
+			try:	
+				currentTweetTimeStamp = getTimeStampFromJson(parsed_json)
+				##Extract and clean unique hashtags from json
+				hashtags = []
+				for hashtag in parsed_json['entities']['hashtags']:
+					cleanHashtag = cleanTweet(hashtag['text'])
+					if cleanHashtag <> '':
+						hashtags.append(cleanHashtag)
+				##remove duplicate hashtags on the same tweet
+				hashtags =list(set(hashtags))	
+				##if there is more than 1 hash-tag in the tweet, add every combination to the tree (e.g. 3 hash-tags will give 6 unique combinations/edges)
+				if len(hashtags) > 1:
+					for pair in itertools.combinations(hashtags, 2):
+						tree.append([currentTweetTimeStamp,pair])
+					
+				##Delete all vertices that are older than the lookback period
+				tree = removeVertices(tree,currentTweetTimeStamp,LOOKBACK_PERIOD_IN_SECONDS)
+				##tree may contain duplicate edges, since the edges in the tree also contain timestamp information
+				uniqueEdges = getUniqueEdges(tree)
+				##figure out how many nodes there are in the graph
+				numberOfNodes = getNodeCount(uniqueEdges)
+				##total connections in the graph is number of edges * 2
+				##if a is connected to b, this is counted as two connections
+				totalEdges = len(uniqueEdges)*2
+				##if there are no edges, the rolling average will default to 0.00
+				rollingAverage = 0.00
+				if len(uniqueEdges)>0:
+					rollingAverage = round(totalEdges/numberOfNodes,5)
+				target.write(" %.2f\n" % rollingAverage ) 
+			except KeyError:
+				pass
 
-		#print "*******************************************\n"
-		f2.write(calculation+"\n")
-
-	f2.close()
+	generate_graphviz_output(uniqueEdges)
+	#print tree
+	target.close()
+	return len(content)
+	
+if __name__ == "__main__":
+	start_time = time.time()
+	tweetsProcessed = main()
+	print("\n--- average_degree.py processed %s tweets in %s seconds ---" % (tweetsProcessed,(time.time() - start_time)))
 
 
 
