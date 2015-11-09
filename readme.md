@@ -86,8 +86,10 @@ in the run.sh. If the sfdp(graphviz) is not installed, the script tries to insta
 	├── src  
 	│   ├── average_degree.py  
 	│   └── tweets_cleaned.py  
+	│   └── test.py  
 	├── tweet_input  
 	│   └── tweets.txt  
+	│   └── tweets2.txt  
 	└── tweet_output  
 	    ├── ft1.txt  
 	    └── ft2.txt  
