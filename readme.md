@@ -93,5 +93,9 @@ in the run.sh. If the sfdp(graphviz) is not installed, the script tries to insta
 	    └── ft2.txt  
 	    └── graphviz.txt
 	    └── graph.png
+	   
+## Testing
+
+The funcionality of both features have been tested using tweets.txt (10,000 tweets provided in the data-gen folder), tweets2.txt (samples in the assignment description), additional tweets downloaded using Twitter API and UnitTests in test.py (in src)
 
 
